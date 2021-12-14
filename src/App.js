@@ -1,12 +1,14 @@
-import boxes from './boxes.js'
 import Box from './Box.js'
 import Counter from './Counter.js'
 
 export default function App() {
-  const [myBoxes, setMyBoxes] = React.useState(boxes)
+  const [boxes, setBoxes] = React.useState(JSON.parse(localStorage.getItem("boxes")) || [{
+    id: 1,
+    on: true
+  }])
   function toggle(id) {
     console.log(id)
-    setMyBoxes(prevMyBoxes => prevMyBoxes.map(box => {
+    setBoxes(prevBoxes => prevBoxes.map(box => {
       if (box.id === id) {
         return {
           ...box,
@@ -21,24 +23,28 @@ export default function App() {
   function changeBox(mode) {
     // Mode will either be "push" or "remove"
     if (mode === "push") {
-      setMyBoxes(prevMyBoxes => prevMyBoxes.concat({
-        id: prevMyBoxes[prevMyBoxes.length - 1].id + 1,
+      setBoxes(prevBoxes => prevBoxes.concat({
+        id: prevBoxes[prevBoxes.length - 1].id + 1,
         on: Math.random() >= 0.5
       }))
     } else if (mode === "remove") {
       // Do not remove the last box
-      if (myBoxes.length === 1) {
+      if (boxes.length === 1) {
         return
       }
-      setMyBoxes(prevMyBoxes => prevMyBoxes.slice(0, -1))
+      setBoxes(prevBoxes => prevBoxes.slice(0, -1))
     }
   }
 
-  const boxElements = myBoxes.map(box => <Box handleClick={() => toggle(box.id)} on={box.on} key={box.id} id={box.id} />)
+  const boxElements = boxes.map(box => <Box handleClick={() => toggle(box.id)} on={box.on} key={box.id} id={box.id} />)
+
+  React.useEffect(() => {
+    localStorage.setItem("boxes", JSON.stringify(boxes))
+  }, [boxes])
 
   return (
     <div className="app">
-      <Counter handleChange={changeBox} count={myBoxes.length} />
+      <Counter handleChange={changeBox} count={boxes.length} />
       <div className="box-container">
         {boxElements}
 
